@@ -78,14 +78,14 @@ export default function CreateABTest() {
       await supabase.storage.from("blink-images").upload(`campaigns/${nameB}`, imageFileB);
       const urlB = supabase.storage.from("blink-images").getPublicUrl(`campaigns/${nameB}`).data.publicUrl;
 
-      // 3. Insert Variant A (Using the specified receivingWallet for payments)
+      // 3. Insert Variant A 
       const { data: blinkA, error: errA } = await supabase.from("blinks").insert([{
         title: titleA, description: descriptionA, price_sol: parseFloat(priceA), 
         image_url: urlA, creator_wallet: receivingWallet 
       }]).select().single();
       if (errA) throw errA;
 
-      // 4. Insert Variant B (Using the specified receivingWallet for payments)
+      // 4. Insert Variant B 
       const { data: blinkB, error: errB } = await supabase.from("blinks").insert([{
         title: titleB, description: descriptionB, price_sol: parseFloat(priceB), 
         image_url: urlB, creator_wallet: receivingWallet 
@@ -131,9 +131,9 @@ export default function CreateABTest() {
         <div className="mb-12 text-center">
           <h1 className="text-4xl font-bold text-white inline-flex items-center gap-3">
             <ArrowRightLeft className="w-8 h-8 text-pink-500" />
-            Launch A/B Test
+            Create A/B Campaign
           </h1>
-          <p className="text-neutral-400 mt-3 text-lg">Split test two different copy variations, images, or prices.</p>
+          <p className="text-neutral-400 mt-3 text-lg">Split-test prices, images, and copy to maximize your Solana revenue.</p>
         </div>
 
         {!generatedUrl ? (

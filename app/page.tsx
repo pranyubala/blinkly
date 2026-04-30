@@ -1,40 +1,54 @@
 import Link from "next/link";
 import { ArrowRight, Wallet, Upload, Link as LinkIcon, Share2, ArrowRightLeft, PlayCircle, Activity } from "lucide-react";
 
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-neutral-950 text-white font-sans selection:bg-pink-500/30">
       
       {/*HERO SECTION */}
-      <section id="home" className="relative pt-32 pb-20 overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-pink-500/20 to-orange-500/20 blur-[120px] rounded-full pointer-events-none"></div>
-        
-        <div className="max-w-5xl mx-auto px-6 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 text-sm font-medium mb-8">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            Solana Devnet Ready
-          </div>
-          
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-tight">
-            The No-Code Blink Studio <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-orange-400">for Solana Creators</span>
-          </h1>
-          
-          <p className="text-xl text-neutral-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Launch single products or split-test prices with our A/B campaign engine. Create, preview, and track your Solana Actions without writing a single line of code.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/dashboard" className="w-full sm:w-auto bg-white text-black px-8 py-4 rounded-xl font-bold text-lg hover:bg-neutral-200 transition-colors flex items-center justify-center gap-2">
-              Launch App <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link href="/preview" className="w-full sm:w-auto bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-colors flex items-center justify-center gap-2">
-              Try the Simulator
-            </Link>
-          </div>
-        </div>
-      </section>
+<section id="home" className="relative pt-32 pb-20 overflow-hidden">
+  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-pink-500/20 to-orange-500/20 blur-[120px] rounded-full pointer-events-none"></div>
+  
+  <div className="max-w-5xl mx-auto px-6 text-center relative z-10">
+    
+    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-pink-500/10 to-orange-500/10 border border-orange-500/20 text-orange-400 text-sm font-semibold mb-8">
+      ✨ The First A/B Revenue Engine for Solana Blinks
+    </div>
+    
+    
+    <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-tight">
+      The No-Code Blink Studio <br className="hidden md:block" />
+      <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-orange-400">for Solana Creators</span>
+    </h1>
+    
+    
+    <p className="text-xl text-neutral-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+      Launch single products or split-test prices with our A/B revenue engine. Create, preview, and track your Solana Actions without writing a single line of code.
+    </p>
+    
+   
+    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+      <Link href="/dashboard" className="w-full sm:w-auto bg-white text-black px-8 py-4 rounded-xl font-bold text-lg hover:bg-neutral-200 transition-colors flex items-center justify-center gap-2">
+        Launch App <ArrowRight className="w-5 h-5" />
+      </Link>
+      <Link href="/preview" className="w-full sm:w-auto bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-colors flex items-center justify-center gap-2">
+        Try the Simulator
+      </Link>
+    </div>
+    
+<div className="relative mx-auto max-w-5xl mt-8 rounded-xl border border-white/10 bg-[#0a0a0a] p-2 shadow-2xl overflow-hidden">
+  <div className="absolute inset-x-0 -top-px mx-auto h-px w-1/2 bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
+  
+  <img 
+    src="/dashboard-preview.png" 
+    alt="Blinkly Dashboard Analytics" 
+    className="w-full rounded-lg border border-white/5 object-cover shadow-inner"
+  />
+</div>
 
+  </div>
+</section>
       {/* HOW IT WORKS SECTION */}
       <section id="how-it-works" className="py-24 bg-black border-y border-neutral-900 relative">
         <div className="max-w-6xl mx-auto px-6">
