@@ -67,6 +67,7 @@ export default function NativeSimulator() {
   };
 
   // Executes the transaction using the SPECIFIC wallet the user clicked
+ 
   const executeTransaction = async (wallet: any) => {
     setShowWalletModal(false); // Close the modal
     
@@ -74,8 +75,15 @@ export default function NativeSimulator() {
       setTxStatus("loading");
       
       const provider = wallet.provider;
-      const resp = await provider.connect();
-      const buyerPubkey = resp.publicKey.toString();
+      
+      // 1. Connect to the wallet 
+      await provider.connect();
+      
+    
+      if (!provider.publicKey) {
+        throw new Error("Wallet connected but no public key found.");
+      }
+      const buyerPubkey = provider.publicKey.toString();
 
       const postRes = await fetch(postUrl, {
         method: "POST",
@@ -87,6 +95,7 @@ export default function NativeSimulator() {
       if (postData.error) throw new Error(postData.error);
 
       const txBuffer = base64ToUint8Array(postData.transaction);
+      
       const transaction = Transaction.from(txBuffer);
       
       const { signature } = await provider.signAndSendTransaction(transaction);
@@ -96,7 +105,7 @@ export default function NativeSimulator() {
 
     } catch (error) {
       console.error("Transaction Error:", error);
-      alert("Transaction failed or was canceled.");
+      alert("Transaction failed or was canceled. Check console for details.");
       setTxStatus("idle");
     }
   };

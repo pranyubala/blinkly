@@ -39,23 +39,31 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
     setTimeout(scanWallets, 500);
   }, []);
 
-  // 2. Connect Specific Wallet
+  // Connect Specific Wallet
   const connectSpecificWallet = async (wallet: any) => {
     try {
-      const resp = await wallet.provider.connect();
-      const pubkey = resp.publicKey.toString();
+      
+      await wallet.provider.connect();
+      
+      if (!wallet.provider.publicKey) {
+        throw new Error("Wallet connected but no public key found.");
+      }
+      
+      const pubkey = wallet.provider.publicKey.toString();
+      
       
       setWalletAddress(pubkey);
       setActiveProvider(wallet.provider);
       localStorage.setItem("blinkly_wallet", pubkey);
       setShowModal(false); // Close modal on success
+      
     } catch (error: any) {
       console.error("Connection error:", error);
       alert(error.message || "Connection rejected.");
     }
   };
 
-  // 3. Dropdown Actions
+  
   const copyAddress = () => {
     if (walletAddress) {
       navigator.clipboard.writeText(walletAddress);
