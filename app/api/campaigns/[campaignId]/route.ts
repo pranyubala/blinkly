@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
- import { supabase } from "../../../lib/supabase"; 
+import { supabase } from "../../../lib/supabase"; 
 
 const headers = {
   "Access-Control-Allow-Origin": "*",
@@ -7,10 +7,8 @@ const headers = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, Content-Encoding, Accept-Encoding",
 };
 
-
 export async function GET(request: Request, context: { params: Promise<{ campaignId: string }> }) {
   try {
-    
     const params = await context.params;
     const targetId = params.campaignId;
 
@@ -22,6 +20,14 @@ export async function GET(request: Request, context: { params: Promise<{ campaig
       .single();
 
     if (campErr || !campaign) throw new Error("Campaign not found");
+
+    
+    if (campaign.is_stopped === true) {
+      return NextResponse.json(
+        { message: "This campaign has ended." }, 
+        { status: 400, headers }
+      );
+    }
 
     // 2. The 50/50 Coin Flip!
     const isVariantA = Math.random() < 0.5;

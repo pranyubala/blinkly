@@ -10,12 +10,15 @@ export async function GET(req: Request, { params }: { params: Promise<{ blinkId:
   try {
     const currentBlinkId = (await params).blinkId;
     const { data: blink, error } = await supabase.from("blinks").select("*").eq("id", currentBlinkId).single();
+    
     if (error || !blink) return new Response("Not found", { status: 404, headers });
 
-  
+    if (blink.is_stopped === true) {
+      return new Response(JSON.stringify({ message: "This campaign has ended." }), { status: 400, headers });
+    }
+
     await supabase.from("blinks").update({ views: (blink.views || 0) + 1 }).eq("id", blink.id);
 
-    
     const baseUrl = new URL(req.url).origin; 
 
     const payload: ActionGetResponse = {
@@ -24,12 +27,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ blinkId:
       description: blink.description,
       label: `Buy for ${blink.price_sol} SOL`,
       links: {
-        
         actions: [{ label: `Buy for ${blink.price_sol} SOL`, href: `${baseUrl}/api/actions/${blink.id}`, type: "transaction" }]
       }
     };
     
-  
     return Response.json(payload, { headers });
   } catch (err) { 
     return new Response("Error", { status: 500, headers }); 
@@ -47,6 +48,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ blinkId
 
     const { data: blink } = await supabase.from("blinks").select("*").eq("id", currentBlinkId).single();
     if (!blink) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+
+  
+    if (blink.is_stopped === true) {
+      return new Response(JSON.stringify({ error: "This campaign has ended." }), { status: 400, headers });
+    }
 
     // Build Transaction on Devnet
     const connection = new Connection(clusterApiUrl("devnet"));
@@ -77,7 +83,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ blinkId
     return Response.json(payload, { headers });
 
   } catch (err) { 
-    
     console.error("POST Crash Details:", err); 
     
     return new Response(JSON.stringify({ error: "Transaction Error" }), { 
