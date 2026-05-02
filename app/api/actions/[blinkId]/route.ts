@@ -49,7 +49,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ blinkId
     const { data: blink } = await supabase.from("blinks").select("*").eq("id", currentBlinkId).single();
     if (!blink) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
 
-  
     if (blink.is_stopped === true) {
       return new Response(JSON.stringify({ error: "This campaign has ended." }), { status: 400, headers });
     }
@@ -74,9 +73,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ blinkId
     // Track Click/Purchase
     await supabase.from("blinks").update({ clicks: (blink.clicks || 0) + 1 }).eq("id", blink.id);
 
-    // Build the success payload
+    
     const payload: ActionPostResponse = await createPostResponse({
-      fields: { transaction, message: `Thanks for purchasing: ${blink.title}!`, type: "transaction" },
+      fields: { 
+        transaction, 
+        message: `Payment Successful! Access your product here: ${blink.product_url}`, 
+        type: "transaction" 
+      },
     });
     
     // Return the success payload

@@ -30,6 +30,7 @@ export default function CreateABTest() {
   const [priceA, setPriceA] = useState("");
   const [imageFileA, setImageFileA] = useState<File | null>(null);
   const [previewA, setPreviewA] = useState<string | null>(null);
+   const [productUrlA, setProductUrlA] = useState("");
 
   // Variant B Dedicated Data
   const [titleB, setTitleB] = useState("");
@@ -37,6 +38,8 @@ export default function CreateABTest() {
   const [priceB, setPriceB] = useState("");
   const [imageFileB, setImageFileB] = useState<File | null>(null);
   const [previewB, setPreviewB] = useState<string | null>(null);
+  const [productUrlB, setProductUrlB] = useState("");
+
 
   const handleImageA = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -81,14 +84,14 @@ export default function CreateABTest() {
       // 3. Insert Variant A 
       const { data: blinkA, error: errA } = await supabase.from("blinks").insert([{
         title: titleA, description: descriptionA, price_sol: parseFloat(priceA), 
-        image_url: urlA, creator_wallet: receivingWallet 
+        image_url: urlA, creator_wallet: receivingWallet , product_url: productUrlA
       }]).select().single();
       if (errA) throw errA;
 
       // 4. Insert Variant B 
       const { data: blinkB, error: errB } = await supabase.from("blinks").insert([{
         title: titleB, description: descriptionB, price_sol: parseFloat(priceB), 
-        image_url: urlB, creator_wallet: receivingWallet 
+        image_url: urlB, creator_wallet: receivingWallet , product_url: productUrlB
       }]).select().single();
       if (errB) throw errB;
 
@@ -147,7 +150,7 @@ export default function CreateABTest() {
                   className="w-full bg-black border border-neutral-800 rounded-xl px-4 py-3 focus:outline-none focus:border-pink-500 transition-colors text-lg" placeholder="e.g., Summer Launch Test" />
               </div>
               
-              {/* 🟢 THE FIX: The Smart Receiving Wallet Field */}
+             
               <div>
                 <label className="block text-sm font-medium text-neutral-400 mb-2 flex items-center justify-between">
                   <span>Receiving Wallet (Where funds go)</span>
@@ -186,6 +189,21 @@ export default function CreateABTest() {
                       className="w-full bg-black border border-neutral-800 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500" placeholder="A comprehensive overview..." />
                   </div>
 
+                      <div className="mb-4">
+  <label className="block text-sm font-medium text-white mb-2">Product Access Link</label>
+  <input 
+    type="url"
+    value={productUrlA}
+    onChange={(e) => setProductUrlA(e.target.value)}
+    placeholder="e.g., Google Drive, Notion, YouTube..."
+    required
+    className="w-full bg-black border border-neutral-800 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors"  
+  />
+  <p className="text-xs text-neutral-300 mt-2">
+    Buyers receive this link instantly after payment. Works for files, templates, videos, or communities.
+  </p>
+</div>
+
                   <div>
                     <label className="block text-xs font-bold text-neutral-400 uppercase tracking-wider mb-2">Price A (SOL)</label>
                     <input type="number" step="0.001" required value={priceA} onChange={(e) => setPriceA(e.target.value)}
@@ -218,6 +236,21 @@ export default function CreateABTest() {
                     <input type="text" required value={descriptionB} onChange={(e) => setDescriptionB(e.target.value)}
                       className="w-full bg-black border border-neutral-800 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500" placeholder="Everything you need to know..." />
                   </div>
+
+                        <div className="mb-4">
+  <label className="block text-sm font-medium text-white mb-2">Product Access Link</label>
+  <input 
+    type="url"
+    value={productUrlB}
+    onChange={(e) => setProductUrlB(e.target.value)}
+    placeholder="e.g., Google Drive, Notion, YouTube..."
+    required
+    className="w-full bg-black border border-neutral-800 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors"  
+  />
+  <p className="text-xs text-neutral-300 mt-2">
+    Buyers receive this link instantly after payment. Works for files, templates, videos, or communities.
+  </p>
+</div>
 
                   <div>
                     <label className="block text-xs font-bold text-neutral-400 uppercase tracking-wider mb-2">Price B (SOL)</label>

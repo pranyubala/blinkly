@@ -18,6 +18,7 @@ export default function CreateBlink() {
   const [price, setPrice] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [productUrl, setProductUrl] = useState("");
 
   // The Smart Receiving Wallet
   const [receivingWallet, setReceivingWallet] = useState("");
@@ -69,6 +70,7 @@ export default function CreateBlink() {
         description,
         price_sol: parseFloat(price),
         image_url: imageUrl,
+        product_url: productUrl,
         creator_wallet: receivingWallet 
       }]).select().single();
       
@@ -86,7 +88,7 @@ export default function CreateBlink() {
     }
   };
 
-  // 🔴 AUTH LOCK
+  // AUTH LOCK
   if (!walletAddress) {
     return (
       <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-6 text-center pb-32 font-sans">
@@ -134,7 +136,7 @@ export default function CreateBlink() {
               <div>
                 <label className="block text-sm font-medium text-neutral-400 mb-2">Product Title</label>
                 <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-black border border-neutral-800 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors" placeholder="e.g., The Ultimate Solana Dev Cheat Sheet (PDF)" />
+                  className="w-full bg-black border border-neutral-800 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors" placeholder="e.g., The Ultimate Solana Dev Sheet (PDF)" />
               </div>
 
               <div>
@@ -142,6 +144,21 @@ export default function CreateBlink() {
                 <input type="text" required value={description} onChange={(e) => setDescription(e.target.value)}
                   className="w-full bg-black border border-neutral-800 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors" placeholder="Everything you need to master Web3 development..." />
               </div>
+
+              <div className="mb-4">
+  <label className="block text-sm font-medium text-white mb-2">Product Access Link</label>
+  <input 
+    type="url"
+    value={productUrl}
+    onChange={(e) => setProductUrl(e.target.value)}
+    placeholder="e.g., Google Drive, Notion, YouTube..."
+    required
+    className="w-full bg-black border border-neutral-800 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors"  
+  />
+  <p className="text-xs text-neutral-300 mt-2">
+    Buyers receive this link instantly after payment. Works for files, templates, videos, or communities.
+  </p>
+</div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>

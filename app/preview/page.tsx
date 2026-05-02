@@ -25,6 +25,7 @@ export default function NativeSimulator() {
   const [signature, setSignature] = useState("");
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [detectedWallets, setDetectedWallets] = useState<any[]>([]);
+  const [successMessage, setSuccessMessage] = useState("");
 
 
   useEffect(() => {
@@ -68,8 +69,8 @@ export default function NativeSimulator() {
 
   // Executes the transaction using the SPECIFIC wallet the user clicked
  
-  const executeTransaction = async (wallet: any) => {
-    setShowWalletModal(false); // Close the modal
+ const executeTransaction = async (wallet: any) => {
+    setShowWalletModal(false); 
     
     try {
       setTxStatus("loading");
@@ -79,7 +80,6 @@ export default function NativeSimulator() {
       // 1. Connect to the wallet 
       await provider.connect();
       
-    
       if (!provider.publicKey) {
         throw new Error("Wallet connected but no public key found.");
       }
@@ -100,6 +100,11 @@ export default function NativeSimulator() {
       
       const { signature } = await provider.signAndSendTransaction(transaction);
       
+    
+      if (postData.message) {
+        setSuccessMessage(postData.message);
+      }
+      
       setSignature(signature);
       setTxStatus("success");
 
@@ -110,6 +115,19 @@ export default function NativeSimulator() {
     }
   };
 
+  
+const renderClickableMessage = (text: string) => {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return text.split(urlRegex).map((part: string, index: number) => 
+    urlRegex.test(part) ? (
+      <a key={index} href={part} target="_blank" rel="noopener noreferrer" className="text-blue-400 font-bold underline hover:text-blue-300">
+        {part}
+      </a>
+    ) : (
+      <span key={index}>{part}</span>
+    )
+  );
+};
   return (
     <div className="min-h-[calc(100vh-64px)] bg-black text-white flex flex-col md:flex-row font-sans relative">
       
@@ -219,10 +237,18 @@ export default function NativeSimulator() {
                     <p className="text-sm text-neutral-400">{blinkData.description}</p>
                     
                     {txStatus === "success" ? (
-                       <div className="bg-green-500/10 border border-green-500/30 text-green-400 rounded-xl p-3 text-center text-sm font-bold">
-                         ✅ Transaction Successful!
-                         <a href={`https://solscan.io/tx/${signature}?cluster=devnet`} target="_blank" className="block text-xs mt-1 underline hover:text-green-300">
-                           View on Solscan
+                       <div className="bg-green-500/10 border border-green-500/30 text-green-400 rounded-xl p-4 text-center text-sm flex flex-col gap-3">
+                         <div className="font-bold">✅ Transaction Successful!</div>
+                         
+                        
+                              {successMessage && (
+                                  <div className="bg-neutral-900 border border-neutral-700 text-neutral-200 p-4 rounded-lg text-sm break-words text-left shadow-inner leading-relaxed">
+                                    {renderClickableMessage(successMessage)}
+                                    </div>
+                                 )}
+
+                         <a href={`https://solscan.io/tx/${signature}?cluster=devnet`} target="_blank" rel="noreferrer" className="block text-sm underline hover:text-green-300 font-bold">
+                           View Receipt on Solscan
                          </a>
                        </div>
                     ) : (
