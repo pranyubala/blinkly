@@ -67,9 +67,10 @@ export default function NativeSimulator() {
     }
   };
 
-  // Executes the transaction using the SPECIFIC wallet the user clicked
+  
  
- const executeTransaction = async (wallet: any) => {
+ // Executes the transaction using the SPECIFIC wallet the user clicked
+  const executeTransaction = async (wallet: any) => {
     setShowWalletModal(false); 
     
     try {
@@ -85,6 +86,7 @@ export default function NativeSimulator() {
       }
       const buyerPubkey = provider.publicKey.toString();
 
+      // 2. Fetch the transaction from your backend
       const postRes = await fetch(postUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -95,22 +97,42 @@ export default function NativeSimulator() {
       if (postData.error) throw new Error(postData.error);
 
       const txBuffer = base64ToUint8Array(postData.transaction);
-      
       const transaction = Transaction.from(txBuffer);
+      
       
       const { signature } = await provider.signAndSendTransaction(transaction);
       
     
-      if (postData.message) {
-        setSuccessMessage(postData.message);
+      if (postData.links?.next?.href) {
+        // Ping the verify route with the valid signature
+        const verifyRes = await fetch(postData.links.next.href, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ account: buyerPubkey, signature: signature }),
+        });
+        
+        const verifyData = await verifyRes.json();
+        
+      
+        let finalMessage = verifyData.description || "Payment verified!";
+        if (verifyData.links?.next?.action?.href) {
+           finalMessage += `\n\nLink: ${verifyData.links.next.action.href}`;
+        }
+        setSuccessMessage(finalMessage);
+      } else {
+      
+        if (postData.message) {
+          setSuccessMessage(postData.message);
+        }
       }
       
       setSignature(signature);
       setTxStatus("success");
 
     } catch (error) {
+    
       console.error("Transaction Error:", error);
-      alert("Transaction failed or was canceled. Check console for details.");
+      alert("Transaction canceled or failed.");
       setTxStatus("idle");
     }
   };

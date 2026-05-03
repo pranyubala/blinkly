@@ -14,7 +14,7 @@ export default function CreateABTest() {
 
   // Global Data
   const [campaignName, setCampaignName] = useState("");
-  // 🟢 NEW: Smart Receiving Wallet State
+  //  NEW: Smart Receiving Wallet State
   const [receivingWallet, setReceivingWallet] = useState("");
 
   // Auto-fill the receiving wallet when the user logs in
@@ -51,7 +51,7 @@ export default function CreateABTest() {
     if (file) { setImageFileB(file); setPreviewB(URL.createObjectURL(file)); }
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
+const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!walletAddress) {
       alert("Please connect your wallet using the top navigation bar first!");
@@ -69,52 +69,66 @@ export default function CreateABTest() {
     setLoading(true);
 
     try {
-      // 1. Upload Image A
+      
+      const newCampaignId = crypto.randomUUID();
+      const newBlinkAId = crypto.randomUUID();
+      const newBlinkBId = crypto.randomUUID();
+      const baseUrl = window.location.origin;
+
       const extA = imageFileA.name.split('.').pop();
-      const nameA = `varA_${Math.random().toString(36).substring(2)}.${extA}`;
-      await supabase.storage.from("blink-images").upload(`campaigns/${nameA}`, imageFileA);
+      const nameA = `varA_${newBlinkAId}.${extA}`;
       const urlA = supabase.storage.from("blink-images").getPublicUrl(`campaigns/${nameA}`).data.publicUrl;
 
-      // 2. Upload Image B
       const extB = imageFileB.name.split('.').pop();
-      const nameB = `varB_${Math.random().toString(36).substring(2)}.${extB}`;
-      await supabase.storage.from("blink-images").upload(`campaigns/${nameB}`, imageFileB);
+      const nameB = `varB_${newBlinkBId}.${extB}`;
       const urlB = supabase.storage.from("blink-images").getPublicUrl(`campaigns/${nameB}`).data.publicUrl;
 
-      // 3. Insert Variant A 
-      const { data: blinkA, error: errA } = await supabase.from("blinks").insert([{
-        title: titleA, description: descriptionA, price_sol: parseFloat(priceA), 
-        image_url: urlA, creator_wallet: receivingWallet , product_url: productUrlA
-      }]).select().single();
-      if (errA) throw errA;
+  
+      const [uploadA, uploadB] = await Promise.all([
+        supabase.storage.from("blink-images").upload(`campaigns/${nameA}`, imageFileA),
+        supabase.storage.from("blink-images").upload(`campaigns/${nameB}`, imageFileB)
+      ]);
 
-      // 4. Insert Variant B 
-      const { data: blinkB, error: errB } = await supabase.from("blinks").insert([{
-        title: titleB, description: descriptionB, price_sol: parseFloat(priceB), 
-        image_url: urlB, creator_wallet: receivingWallet , product_url: productUrlB
-      }]).select().single();
-      if (errB) throw errB;
+      if (uploadA.error) throw uploadA.error;
+      if (uploadB.error) throw uploadB.error;
 
-      // 5. Insert Campaign
-      const { data: campaign, error: campErr } = await supabase.from("campaigns").insert([{
-        name: campaignName, variant_a_id: blinkA.id, variant_b_id: blinkB.id,
-        creator_wallet: walletAddress // Keep the original logged-in wallet for Dashboard ownership!
-      }]).select().single();
+    
+      const { error: blinksErr } = await supabase.from("blinks").insert([
+        {
+          id: newBlinkAId, 
+          title: titleA, description: descriptionA, price_sol: parseFloat(priceA), 
+          image_url: urlA, creator_wallet: receivingWallet, product_url: productUrlA
+        },
+        {
+          id: newBlinkBId, 
+          title: titleB, description: descriptionB, price_sol: parseFloat(priceB), 
+          image_url: urlB, creator_wallet: receivingWallet, product_url: productUrlB
+        }
+      ]);
+      if (blinksErr) throw blinksErr;
+
+    
+      const { error: campErr } = await supabase.from("campaigns").insert([{
+        id: newCampaignId, 
+        name: campaignName, 
+        variant_a_id: newBlinkAId, 
+        variant_b_id: newBlinkBId,
+        creator_wallet: walletAddress 
+      }]);
       if (campErr) throw campErr;
 
-      // 6. Generate Links
-      const baseUrl = window.location.origin;
-      setGeneratedUrl(`${baseUrl}/api/campaigns/${campaign.id}`);
-      setCampaignId(campaign.id);
+      // 7. Reveal the link!
+      setGeneratedUrl(`${baseUrl}/api/campaigns/${newCampaignId}`);
+      setCampaignId(newCampaignId);
 
     } catch (error) {
       console.error("Error creating campaign:", error);
       alert("Failed to create A/B Test. Check console.");
     } finally {
+    
       setLoading(false);
     }
   };
-
   if (!walletAddress) {
     return (
       <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-6 text-center pb-32 font-sans">
@@ -190,20 +204,19 @@ export default function CreateABTest() {
                   </div>
 
                       <div className="mb-4">
-  <label className="block text-sm font-medium text-white mb-2">Product Access Link</label>
-  <input 
-    type="url"
-    value={productUrlA}
-    onChange={(e) => setProductUrlA(e.target.value)}
-    placeholder="e.g., Google Drive, Notion, YouTube..."
-    required
-    className="w-full bg-black border border-neutral-800 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors"  
-  />
-  <p className="text-xs text-neutral-300 mt-2">
-    Buyers receive this link instantly after payment. Works for files, templates, videos, or communities.
-  </p>
-</div>
-
+                        <label className="block text-sm font-medium text-white mb-2">Product Access Link</label>
+                               <input 
+                                   type="url"
+                                   value={productUrlA}
+                                   onChange={(e) => setProductUrlA(e.target.value)}
+                                   placeholder="e.g., Google Drive, Notion, YouTube..."
+                                   required
+                                   className="w-full bg-black border border-neutral-800 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors"  
+                                    />
+                                  <p className="text-xs text-neutral-300 mt-2">
+                           Buyers receive this link instantly after payment. Works for files, templates, videos, or communities.
+                  </p>
+                </div>
                   <div>
                     <label className="block text-xs font-bold text-neutral-400 uppercase tracking-wider mb-2">Price A (SOL)</label>
                     <input type="number" step="0.001" required value={priceA} onChange={(e) => setPriceA(e.target.value)}
@@ -238,20 +251,19 @@ export default function CreateABTest() {
                   </div>
 
                         <div className="mb-4">
-  <label className="block text-sm font-medium text-white mb-2">Product Access Link</label>
-  <input 
-    type="url"
-    value={productUrlB}
-    onChange={(e) => setProductUrlB(e.target.value)}
-    placeholder="e.g., Google Drive, Notion, YouTube..."
-    required
-    className="w-full bg-black border border-neutral-800 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors"  
-  />
-  <p className="text-xs text-neutral-300 mt-2">
-    Buyers receive this link instantly after payment. Works for files, templates, videos, or communities.
-  </p>
-</div>
-
+                      <label className="block text-sm font-medium text-white mb-2">Product Access Link</label>
+                         <input 
+                          type="url"
+                          value={productUrlB}
+                          onChange={(e) => setProductUrlB(e.target.value)}
+                          placeholder="e.g., Google Drive, Notion, YouTube..."
+                          required
+                          className="w-full bg-black border border-neutral-800 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors"  
+                           />
+                  <p className="text-xs text-neutral-300 mt-2">
+                  Buyers receive this link instantly after payment. Works for files, templates, videos, or communities.
+                  </p>
+               </div>
                   <div>
                     <label className="block text-xs font-bold text-neutral-400 uppercase tracking-wider mb-2">Price B (SOL)</label>
                     <input type="number" step="0.001" required value={priceB} onChange={(e) => setPriceB(e.target.value)}

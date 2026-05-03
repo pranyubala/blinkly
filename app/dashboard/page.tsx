@@ -2,17 +2,28 @@
 
 import { useEffect, useState, Fragment } from "react";
 import { supabase } from "../lib/supabase";   
-import { Copy, Activity, ArrowRightLeft, Zap, PlayCircle, Trash2, Eye, MousePointerClick, Coins, Wallet } from "lucide-react";
+import { Copy, Activity, ArrowRightLeft, Zap, PlayCircle, Eye, MousePointerClick, Coins, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useWallet } from "@/components/ClientWrapper";
 
 export default function Dashboard() {
   const { walletAddress } = useWallet(); 
   
+  // Data State
   const [items, setItems] = useState<any[]>([]);
   const [stats, setStats] = useState({ views: 0, clicks: 0, revenue: 0 });
   const [loading, setLoading] = useState(true);
   const [baseUrl, setBaseUrl] = useState("");
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; 
+
+  // Calculate Pagination Data
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = items.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(items.length / itemsPerPage);
 
   useEffect(() => {
     setBaseUrl(window.location.origin);
@@ -53,7 +64,6 @@ export default function Dashboard() {
         const campClicks = (varA?.clicks || 0) + (varB?.clicks || 0);
         const campRevenue = ((varA?.clicks || 0) * (varA?.price_sol || 0)) + ((varB?.clicks || 0) * (varB?.price_sol || 0));
 
-  
         return { 
           ...camp, type: "A/B Campaign", 
           views: campViews, 
@@ -83,7 +93,6 @@ export default function Dashboard() {
           revenue: (b.clicks || 0) * (b.price_sol || 0), 
           created_at: b.created_at,
           is_stopped: b.is_stopped
-          
         };
       }) || [];
 
@@ -110,7 +119,6 @@ export default function Dashboard() {
       } else {
         await supabase.from("blinks").update({ is_stopped: true }).eq("id", id);
       }
-      
       
       setItems(items.map(item => 
         item.id === id ? { ...item, is_stopped: true } : item
@@ -200,10 +208,10 @@ export default function Dashboard() {
                 <tbody className="divide-y divide-neutral-800/50">
                   {items.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="p-8 text-center text-neutral-500">No active links found. Start creating!</td>
+                      <td colSpan={7} className="p-8 text-center text-neutral-500">No active links found. Start creating!</td>
                     </tr>
                   ) : (
-                    items.map((item) => {
+                    currentItems.map((item) => {
                       const isCamp = item.type === "A/B Campaign";
                       const actionUrl = isCamp ? `${baseUrl}/api/campaigns/${item.id}` : `${baseUrl}/api/actions/${item.id}`;
                       
@@ -211,59 +219,53 @@ export default function Dashboard() {
                         <Fragment key={item.id}>
 
                           {/* MAIN ROW */}
-                       
-                         
-                     <tr className="hover:bg-neutral-800/30 transition-colors group">
-  
-
-                       <td className="p-4">
-                       <div className="font-bold text-white mb-1">{item.name || "Unnamed"}</div>
-                           <div className="text-xs text-neutral-500 font-mono">ID: {item.id.substring(0, 8)}...</div>
-                          </td>
-                              <td className="p-4 text-center">
-                                   <span className={`text-xs font-bold px-2 py-1 rounded-md ${isCamp ? 'bg-pink-500/10 text-pink-400' : 'bg-blue-500/10 text-blue-400'}`}>
-                                 {item.type}
-                                     </span>
-                                </td>
-
-  
-                               <td className="p-4 text-center">
-                          {item.is_stopped ? (
-                                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-500 border border-red-500/20 tracking-wider">
-                                     STOPPED
-                               </span>
-                                  ) : (
-                           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 tracking-wider inline-flex items-center gap-1.5">
-                                   <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                                        ACTIVE
-                                  </span>
-                                         )}
-                                   </td>
-                                   <td className="p-4 text-center font-medium text-neutral-300">{item.views}</td>
-                                      <td className="p-4 text-center font-medium text-neutral-300">{item.clicks}</td>
-                                        <td className="p-4 text-right font-bold text-green-400">+{item.revenue.toFixed(3)}</td>
-                                          <td className="p-4 text-right">
-                                         <div className="flex justify-end items-center gap-2">
-                                            <button 
-                                                 onClick={() => !item.is_stopped && handleStop(item.id, item.type)} 
-                                                    className={`p-2 rounded-lg transition-colors flex justify-center items-center min-w-[56px] ${
-                                                     item.is_stopped 
-                                                             ? 'invisible pointer-events-none' 
-                                                     : 'bg-neutral-800 hover:bg-yellow-500/20 text-neutral-400 hover:text-yellow-500 opacity-0 group-hover:opacity-100'
-                                                     }`} 
-                                                title="Stop Campaign"
-                                                        >
-                                                   <span className="text-xs font-bold">STOP</span>
-                                          </button>
-                                     <button onClick={() => copyToClipboard(actionUrl)} className="p-2 bg-neutral-800 hover:bg-neutral-700 rounded-lg text-neutral-400 hover:text-white transition-colors" title="Copy Link">
-                                 <Copy className="w-4 h-4" />
-                                    </button>
-                                   <Link href="/preview" className="p-2 bg-neutral-800 hover:bg-pink-600/20 rounded-lg text-neutral-400 hover:text-pink-400 transition-colors" title="Test in Simulator">
-                                   <PlayCircle className="w-4 h-4" />
-                                  </Link>
-                                  </div>
-                                   </td>
-                                    </tr>
+                          <tr className="hover:bg-neutral-800/30 transition-colors group">
+                            <td className="p-4">
+                              <div className="font-bold text-white mb-1">{item.name || "Unnamed"}</div>
+                              <div className="text-xs text-neutral-500 font-mono">ID: {item.id.substring(0, 8)}...</div>
+                            </td>
+                            <td className="p-4 text-center">
+                              <span className={`text-xs font-bold px-2 py-1 rounded-md ${isCamp ? 'bg-pink-500/10 text-pink-400' : 'bg-blue-500/10 text-blue-400'}`}>
+                                {item.type}
+                              </span>
+                            </td>
+                            <td className="p-4 text-center">
+                              {item.is_stopped ? (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-500 border border-red-500/20 tracking-wider">
+                                  STOPPED
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 tracking-wider inline-flex items-center gap-1.5">
+                                  <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
+                                  ACTIVE
+                                </span>
+                              )}
+                            </td>
+                            <td className="p-4 text-center font-medium text-neutral-300">{item.views}</td>
+                            <td className="p-4 text-center font-medium text-neutral-300">{item.clicks}</td>
+                            <td className="p-4 text-right font-bold text-green-400">+{item.revenue.toFixed(3)}</td>
+                            <td className="p-4 text-right">
+                              <div className="flex justify-end items-center gap-2">
+                                <button 
+                                  onClick={() => !item.is_stopped && handleStop(item.id, item.type)} 
+                                  className={`p-2 rounded-lg transition-colors flex justify-center items-center min-w-[56px] ${
+                                    item.is_stopped 
+                                      ? 'invisible pointer-events-none' 
+                                      : 'bg-neutral-800 hover:bg-yellow-500/20 text-neutral-400 hover:text-yellow-500 opacity-0 group-hover:opacity-100'
+                                  }`} 
+                                  title="Stop Campaign"
+                                >
+                                  <span className="text-xs font-bold">STOP</span>
+                                </button>
+                                <button onClick={() => copyToClipboard(actionUrl)} className="p-2 bg-neutral-800 hover:bg-neutral-700 rounded-lg text-neutral-400 hover:text-white transition-colors" title="Copy Link">
+                                  <Copy className="w-4 h-4" />
+                                </button>
+                                <Link href="/preview" className="p-2 bg-neutral-800 hover:bg-pink-600/20 rounded-lg text-neutral-400 hover:text-pink-400 transition-colors" title="Test in Simulator">
+                                  <PlayCircle className="w-4 h-4" />
+                                </Link>
+                              </div>
+                            </td>
+                          </tr>
 
                           {/*  A/B SPLIT COMPARISON SUB-ROW */}
                           {isCamp && (
@@ -304,6 +306,32 @@ export default function Dashboard() {
                 </tbody>
               </table>
             </div>
+
+            {/* THE PAGINATION FOOTER */}
+            {totalPages > 1 && (
+              <div className="bg-neutral-950/50 border-t border-neutral-800 p-4 flex justify-between items-center">
+                <button 
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-white disabled:opacity-30 transition-all text-sm font-bold flex items-center gap-2"
+                >
+                  ← Previous
+                </button>
+                
+                <span className="text-neutral-400 text-sm font-medium">
+                  Page <span className="text-white">{currentPage}</span> of {totalPages}
+                </span>
+                
+                <button 
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-white disabled:opacity-30 transition-all text-sm font-bold flex items-center gap-2"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
+            
           </div>
         )}
       </div>

@@ -144,27 +144,55 @@ Solana wallet extensions.
 
       {/*  FAQ SECTION */}
       <section id="faq" className="py-24 bg-black border-t border-neutral-900">
-        <div className="max-w-3xl mx-auto px-6">
-          <h2 className="text-3xl font-bold mb-12 text-center">Frequently Asked Questions</h2>
-          
-          <div className="space-y-6">
-            <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl">
-              <h4 className="font-bold text-lg mb-2 text-white">How does the 50/50 A/B split work?</h4>
-              <p className="text-neutral-400">Our server physically flips a coin the millisecond a user clicks your link on Twitter. The user has no idea a test is happening—they just see the variant they were assigned, ensuring perfectly clean data.</p>
-            </div>
-            
-            <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl">
-              <h4 className="font-bold text-lg mb-2 text-white">What wallets are supported?</h4>
-              <p className="text-neutral-400">Because our Blinks strictly follow the official Solana Actions standard, they work natively with Phantom, Backpack, Solflare, and OKX Web3 wallets right out of the box.</p>
-            </div>
-            
-            <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl">
-              <h4 className="font-bold text-lg mb-2 text-white">Do I need to pay to generate a Blink?</h4>
-              <p className="text-neutral-400">No. Generating Standard Blinks and A/B Campaigns is 100% free. The only fees are standard Solana network gas fees when your buyer actually executes a transaction.</p>
-            </div>
+  <div className="max-w-3xl mx-auto px-6">
+    <h2 className="text-3xl font-bold mb-12 text-center">Frequently Asked Questions</h2>
+    
+    <div className="space-y-6">
+      
+    
+      <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl">
+        <h4 className="font-bold text-lg mb-4 text-white">How does it work?</h4>
+        <p className="text-neutral-400 mb-4">Four simple steps:</p>
+        <div className="space-y-4 text-neutral-400">
+          <div>
+            <span className="font-bold text-white">1. Create →</span> Connect your wallet, fill in your 
+                   product title, description, price in SOL, upload an image, and add your product access link.
+
+
+          </div>
+          <div>
+            <span className="font-bold text-white">2. Launch →</span> Choose your campaign type:
+            <ul className="list-disc pl-5 mt-2 space-y-1 text-sm">
+              <li><strong className="text-neutral-300">Standard Blink</strong> — single product, one price</li>
+              <li><strong className="text-neutral-300">A/B Campaign</strong> — two variants, automatic 50/50 traffic split to find what converts best</li>
+            </ul>
+          </div>
+          <div>
+            <span className="font-bold text-white">3. Share →</span> Paste your link on Twitter/X. It unfurls into an interactive buy card automatically. No code required.
+          </div>
+          <div>
+            <span className="font-bold text-white">4. Earn & Analyze →</span> Buyer approves the transaction. SOL hits your wallet instantly. Buyer receives your product link. Track views, sales, and revenue in real-time from your dashboard.
           </div>
         </div>
-      </section>
+      </div>
+
+      <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl">
+        <h4 className="font-bold text-lg mb-2 text-white">How does the 50/50 A/B split work?</h4>
+        <p className="text-neutral-400">Our server physically flips a coin the millisecond a user clicks your link on Twitter. The user has no idea a test is happening—they just see the variant they were assigned, ensuring perfectly clean data.</p>
+      </div>
+      
+      <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl">
+        <h4 className="font-bold text-lg mb-2 text-white">What wallets are supported?</h4>
+        <p className="text-neutral-400">Because our Blinks strictly follow the official Solana Actions standard, they work natively with Phantom, Backpack, Solflare, and OKX Web3 wallets right out of the box.</p>
+      </div>
+      
+      <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl">
+        <h4 className="font-bold text-lg mb-2 text-white">Do I need to pay to generate a Blink?</h4>
+        <p className="text-neutral-400">No. Generating Standard Blinks and A/B Campaigns is 100% free. The only fees are standard Solana network gas fees when your buyer actually executes a transaction.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* Footer */}
       <footer className="border-t border-neutral-900 bg-neutral-950 py-12">

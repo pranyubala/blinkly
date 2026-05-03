@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
 
 import { ActionGetResponse, ActionPostRequest, ActionPostResponse, createActionHeaders, createPostResponse } from "@solana/actions";
 import { Connection, PublicKey, SystemProgram, Transaction, clusterApiUrl, LAMPORTS_PER_SOL } from "@solana/web3.js";
@@ -17,6 +18,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ blinkId:
       return new Response(JSON.stringify({ message: "This campaign has ended." }), { status: 400, headers });
     }
 
+    
     await supabase.from("blinks").update({ views: (blink.views || 0) + 1 }).eq("id", blink.id);
 
     const baseUrl = new URL(req.url).origin; 
@@ -37,7 +39,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ blinkId:
   }
 }
 
-// Required for CORS
 export async function OPTIONS() { return new Response(null, { headers }); }
 
 export async function POST(req: Request, { params }: { params: Promise<{ blinkId: string }> }) {
@@ -53,12 +54,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ blinkId
       return new Response(JSON.stringify({ error: "This campaign has ended." }), { status: 400, headers });
     }
 
-    // Build Transaction on Devnet
     const connection = new Connection(clusterApiUrl("devnet"));
     
-    // SAFETY CHECK: Ensure the database has the correct wallet column
     if (!blink.creator_wallet) {
-      console.error("CRITICAL: Missing creator_wallet in database for Blink:", blink.id);
       return new Response(JSON.stringify({ error: "Creator wallet address not configured" }), { status: 400, headers });
     }
 
@@ -70,27 +68,27 @@ export async function POST(req: Request, { params }: { params: Promise<{ blinkId
     transaction.feePayer = buyerPubkey;
     transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
-    // Track Click/Purchase
-    await supabase.from("blinks").update({ clicks: (blink.clicks || 0) + 1 }).eq("id", blink.id);
+    const baseUrl = new URL(req.url).origin; 
 
-    
     const payload: ActionPostResponse = await createPostResponse({
       fields: { 
         transaction, 
-        message: `Payment Successful! Access your product here: ${blink.product_url}`, 
-        type: "transaction" 
+        message: "Please approve the transaction to access your product.", 
+        type: "transaction",
+        links: {
+          next: {
+            type: "post",
+            // This is the new route we are about to create!
+            href: `${baseUrl}/api/actions/verify?blinkId=${currentBlinkId}` 
+          }
+        }
       },
     });
     
-    // Return the success payload
     return Response.json(payload, { headers });
 
   } catch (err) { 
     console.error("POST Crash Details:", err); 
-    
-    return new Response(JSON.stringify({ error: "Transaction Error" }), { 
-      status: 500, 
-      headers 
-    }); 
+    return new Response(JSON.stringify({ error: "Transaction Error" }), { status: 500, headers }); 
   }
 }

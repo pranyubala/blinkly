@@ -38,55 +38,69 @@ export default function CreateBlink() {
     }
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!walletAddress) {
-      alert("Please connect your wallet first!");
-      return;
-    }
-    if (!receivingWallet) {
-      alert("Please specify a receiving wallet address!");
-      return;
-    }
-    if (!imageFile) {
-      alert("Please upload a product image!");
-      return;
-    }
+ const handleCreate = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!walletAddress) {
+    alert("Please connect your wallet first!");
+    return;
+  }
+  if (!receivingWallet) {
+    alert("Please specify a receiving wallet address!");
+    return;
+  }
+  if (!imageFile) {
+    alert("Please upload a product image!");
+    return;
+  }
 
-    setLoading(true);
+  
+  setLoading(true);
 
-    try {
-      // 1. Upload Image
-      const ext = imageFile.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2)}.${ext}`;
-      const { error: uploadErr } = await supabase.storage.from("blink-images").upload(`products/${fileName}`, imageFile);
-      if (uploadErr) throw uploadErr;
+  try {
+    const newId = crypto.randomUUID(); 
+    const baseUrl = window.location.origin;
 
-      const imageUrl = supabase.storage.from("blink-images").getPublicUrl(`products/${fileName}`).data.publicUrl;
+    
+    const ext = imageFile.name.split('.').pop();
+    const fileName = `${newId}.${ext}`;
+    const imageUrl = supabase.storage.from("blink-images").getPublicUrl(`products/${fileName}`).data.publicUrl;
 
-      // 2. Insert into Database
-      const { data: blink, error: insertErr } = await supabase.from("blinks").insert([{
-        title,
-        description,
+    
+    const [uploadResult, insertResult] = await Promise.all([
+      supabase.storage.from("blink-images").upload(`products/${fileName}`, imageFile),
+      supabase.from("blinks").insert([{
+        id: newId,
+        title, 
+        description, 
         price_sol: parseFloat(price),
-        image_url: imageUrl,
-        product_url: productUrl,
+        image_url: imageUrl, 
+        product_url: productUrl, 
         creator_wallet: receivingWallet 
-      }]).select().single();
-      
-      if (insertErr) throw insertErr;
+      }])
+    ]);
 
-      // 3. Generate Link
-      const baseUrl = window.location.origin;
-      setGeneratedUrl(`${baseUrl}/api/actions/${blink.id}`);
+    
+    if (uploadResult.error) throw uploadResult.error;
+    if (insertResult.error) throw insertResult.error;
 
-    } catch (error) {
-      console.error("Error creating blink:", error);
-      alert("Failed to create product. Check console.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const newDashboardItem = {
+      id: newId,
+      title: title,
+      price_sol: price,
+      image_url: URL.createObjectURL(imageFile), 
+      clicks: 0,
+      views: 0
+    };
+   
+    setGeneratedUrl(`${baseUrl}/api/actions/${newId}`);
+
+  } catch (error) {
+    console.error("Creation failed:", error);
+    alert("Something went wrong saving to the database. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   // AUTH LOCK
   if (!walletAddress) {
